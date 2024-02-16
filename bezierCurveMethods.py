@@ -1,6 +1,7 @@
 import numpy as np
 from math import sqrt
 from numpy.linalg import inv
+import matplotlib.pyplot as plt
 
 # Define matrix m, which contains coefficients for the cubic Bézier curve
 m = np.array([[-1, 3, -3, 1], [3, -6, 3, 0], [-3, 3, 0, 0], [1, 0, 0, 0]])
@@ -65,3 +66,37 @@ def calculateDistanceMatrix(x, y):
         distance[i] = distance[i - 1] + sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
     
     return distance
+
+def plotBezierCurve(x, y, xCtrl, yCtrl):
+    print('xCtrl')
+    print(xCtrl)
+    print('yCtrl')
+    print(yCtrl)
+    
+    # Create a new figure
+    plt.figure()
+
+    # Plot connecting lines
+    for i in range(len(xCtrl) - 1):
+        plt.plot([xCtrl[i], xCtrl[i+1]], [yCtrl[i], yCtrl[i+1]], color='lightgray', linestyle='--')
+
+    # Plot control points
+    plt.plot(xCtrl, yCtrl, 'o', color='lightblue', label='Control Points')
+    
+    # Plot original points
+    plt.plot(x, y, 'bo', label='Original Points')
+
+    # Plot Bézier curve
+    tValues = np.linspace(0, 1, 100)
+    bezierCurve = np.array([[(1 - t) ** 3, 3 * t * (1 - t) ** 2, 3 * t ** 2 * (1 - t), t ** 3] for t in tValues])
+    fitCurve = np.dot(bezierCurve, np.array([xCtrl, yCtrl]).T)
+    plt.plot(fitCurve[:, 0], fitCurve[:, 1], 'g-', label='Bézier Curve')
+
+
+    # Add labels and legend
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.legend()
+
+    # Show the plot
+    plt.show()
