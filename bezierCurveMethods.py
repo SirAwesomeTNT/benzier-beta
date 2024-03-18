@@ -7,7 +7,17 @@ import matplotlib.pyplot as plt
 m = np.array([[-1, 3, -3, 1], [3, -6, 3, 0], [-3, 3, 0, 0], [1, 0, 0, 0]])
 
 def calculateLeastSquaresBezierControlPoints(x, y):
-
+    """
+    Calculate the control points for a cubic Bézier curve using least squares regression.
+    
+    Args:
+    - x: Array of x-coordinate data points
+    - y: Array of y-coordinate data points
+    
+    Returns:
+    - xCtrl: Array of x-coordinate control points
+    - yCtrl: Array of y-coordinate control points
+    """
     s = calculateLeastSquaresCoefficientsMatrix(x, y)
 
     # Calculate the values for the p array that gives us the x and y locations of the final control points
@@ -24,9 +34,16 @@ def calculateLeastSquaresBezierControlPoints(x, y):
     return xCtrl, yCtrl
 
 def calculateLeastSquaresCoefficientsMatrix(x, y):
-    # Calculate the values for leastSquaresCoefficients matrix, which stores the values needed for a least squares regression analysis
-    # The last column is filled with ones (bezierIndex[i]^0)
-
+    """
+    Calculate the coefficients matrix for least squares regression.
+    
+    Args:
+    - x: Array of x-coordinate data points
+    - y: Array of y-coordinate data points
+    
+    Returns:
+    - leastSquaresCoefficients: Coefficients matrix for least squares regression
+    """
     bezierIndex = calculateBezierIndexMatrix(x, y)
 
     leastSquaresCoefficients = np.ones((x.size, 4))
@@ -38,38 +55,58 @@ def calculateLeastSquaresCoefficientsMatrix(x, y):
     return leastSquaresCoefficients
 
 def calculateBezierIndexMatrix(x, y):
-    # Calculate the values for the bezierIndex matrix, which stores the respective indexes of the points on the cubic Bezier curve
-
-    # Calculate distance matrix
+    """
+    Calculate the Bézier index matrix.
+    
+    Args:
+    - x: Array of x-coordinate data points
+    - y: Array of y-coordinate data points
+    
+    Returns:
+    - bezierIndex: Array storing the respective indexes of the points on the cubic Bézier curve
+    """
     distance = calculateDistanceMatrix(x, y)
 
-    # Initialize matrix
     bezierIndex = np.zeros(x.size)
 
-    # This loop doesn't iterate over the first value in bezierIndex, since bezierIndex[0] = 0
     for i in range(1, x.size):
-        # bezierIndex[i] = length of the most recent segment / length of all segments
         bezierIndex[i] = (distance[i]) / distance[distance.size - 1]
     
     return bezierIndex
 
 def calculateDistanceMatrix(x, y):
-    # Calculate the values for the distance matrix, which stores the distance from the start of the parent curve to each consecutive point
+    """
+    Calculate the distance matrix.
+    
+    Args:
+    - x: Array of x-coordinate data points
+    - y: Array of y-coordinate data points
+    
+    Returns:
+    - distance: Array storing the distance from the start of the parent curve to each consecutive point
+    """
     distance = np.zeros(x.size)
 
-    # This loop doesn't iterate over the first value in d since d[0] = 0
     for i in range(1, x.size):
         x1 = np.ndarray.item(x[i])
         x2 = np.ndarray.item(x[i - 1])
         y1 = np.ndarray.item(y[i])
         y2 = np.ndarray.item(y[i - 1])
 
-        # a^2 + b^2 = c^2, solving for c
         distance[i] = distance[i - 1] + sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
     
     return distance
 
 def plotBezierCurve(x, y, xCtrl, yCtrl):
+    """
+    Plot the original data points, control points, and the Bézier curve.
+    
+    Args:
+    - x: Array of original x-coordinate data points
+    - y: Array of original y-coordinate data points
+    - xCtrl: Array of x-coordinate control points
+    - yCtrl: Array of y-coordinate control points
+    """
     print('xCtrl')
     print(xCtrl)
     print('yCtrl')
