@@ -19,7 +19,9 @@ def calculateLeastSquaresBezierControlPoints(x, y):
     # Create matrix p, in which control points will be stored
     controlPoints = np.hstack((xP, yP))
 
-    return controlPoints
+    xCtrl, yCtrl = controlPoints[:, 0], controlPoints[:, 1]
+
+    return xCtrl, yCtrl
 
 def calculateLeastSquaresCoefficientsMatrix(x, y):
     # Calculate the values for leastSquaresCoefficients matrix, which stores the values needed for a least squares regression analysis
