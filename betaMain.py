@@ -44,7 +44,7 @@ def generateControlPointsForBezierCurves(samples, step):
         segment = samples[i:i+4]
         
         # Calculate control points for the Bezier curve segment
-        xCtrl, yCtrl = generateControlPoints(indexes.reshape(-1, 1), segment.reshape(-1, 1))
+        xCtrl, yCtrl = generateControlPoints(indexes, segment)
 
         # Append all values to their respective arrays
         indexesIterated = np.append(indexesIterated, [indexes], axis=0)
@@ -75,18 +75,3 @@ for j in range(1, 4):
 
     # plot all samples and curves
     plotSamplesAndBezierCurves(left10, xControlPoints, yControlPoints)
-
-sys.exit()
-random_integers = np.random.randint(0, 6, 4)
-y = random_integers.reshape(-1, 1)
-x = np.arange(4).reshape(-1, 1)
-
-print(x, y)
-
-
-# run functions
-# create control points arrays
-xCtrl, yCtrl = generateControlPoints(x, y)
-
-# plot the bezier curve
-plotBezierCurve(x, y, xCtrl, yCtrl)

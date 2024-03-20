@@ -18,6 +18,12 @@ def calculateLeastSquaresBezierControlPoints(x, y):
     - xCtrl: Array of x-coordinate control points
     - yCtrl: Array of y-coordinate control points
     """
+    # reshapes arrays vertically if necessary
+    if len(x.shape) == 1:
+        x = x.reshape(-1, 1)
+    if len(y.shape) == 1:
+        y = y.reshape(-1, 1)
+
     s = calculateLeastSquaresCoefficientsMatrix(x, y)
 
     # Calculate the values for the p array that gives us the x and y locations of the final control points
@@ -107,11 +113,16 @@ def plotBezierCurve(x, y, xCtrl, yCtrl):
     - xCtrl: Array of x-coordinate control points
     - yCtrl: Array of y-coordinate control points
     """
-    print('xCtrl')
-    print(xCtrl)
-    print('yCtrl')
-    print(yCtrl)
-    
+    # Reshape arrays if necessary
+    if len(x.shape) == 1:
+        x = x.reshape(1, -1)
+    if len(y.shape) == 1:
+        y = y.reshape(1, -1)
+    if len(xCtrl.shape) == 1:
+        xCtrl = xCtrl.reshape(1, -1)
+    if len(yCtrl.shape) == 1:
+        yCtrl = yCtrl.reshape(1, -1)
+
     # Create a new figure
     plt.figure()
 
@@ -128,9 +139,10 @@ def plotBezierCurve(x, y, xCtrl, yCtrl):
     # Plot Bézier curve
     tValues = np.linspace(0, 1, 100)
     bezierCurve = np.array([[(1 - t) ** 3, 3 * t * (1 - t) ** 2, 3 * t ** 2 * (1 - t), t ** 3] for t in tValues])
-    fitCurve = np.dot(bezierCurve, np.array([xCtrl, yCtrl]).T)
-    plt.plot(fitCurve[:, 0], fitCurve[:, 1], 'g-', label='Bézier Curve')
+    fitCurve = np.dot(bezierCurve, np.array([xCtrl.flatten(), yCtrl.flatten()]).T)
 
+    # Plot Bézier curve
+    plt.plot(fitCurve[:, 0], fitCurve[:, 1], 'g-', label='Bézier Curve')
 
     # Add labels and legend
     plt.xlabel('X')
