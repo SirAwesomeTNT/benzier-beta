@@ -1,6 +1,6 @@
 from sympy import symbols, solve, simplify, Rational
 
-def solveForT(P0Value, P1Value, P2Value, P3Value, xValue):
+def solveForT(controlPoints, xValue):
     # Define symbols
     t, x, P0, P1, P2, P3 = symbols('t x P0 P1 P2 P3')
     
@@ -10,7 +10,7 @@ def solveForT(P0Value, P1Value, P2Value, P3Value, xValue):
     print(equation)
 
     # Substitute known values into the equation
-    equationWithKnowns = equation.subs({P0: P0Value, P1: P1Value, P2: P2Value, P3: P3Value, x: xValue})
+    equationWithKnowns = equation.subs({P0: controlPoints[0], P1: controlPoints[1], P2: controlPoints[2], P3: controlPoints[3], x: xValue})
     print("\nEquation with Known Values Substituted:")
     print(equationWithKnowns)
 
@@ -18,46 +18,58 @@ def solveForT(P0Value, P1Value, P2Value, P3Value, xValue):
     solutions = solve(equationWithKnowns, t)
     print("\nSolutions:")
     print(solutions)
+    print("-----------------")
     
     return solutions
 
-def simplifyForControlPoints(P0Value, P3Value, xValue, tValue):
+def simplifyForControlPoints(controlPoints, xValue, tValue):
     # Define symbols
     t, x, P0, P1, P2, P3 = symbols('t x P0 P1 P2 P3')
 
-    # Define the equation with known constants
-    equation = (1 - t)**3 * P0 + 3 * (1 - t)**2 * t * P1 + 3 * (1 - t) * t**2 * P2 + t**3 * P3 - x
-    print("Original Equation:")
-    print(equation)
+    for tSolution in tValue:
+        print(f"t = {tSolution}")
+        # Define the equation with known constants
+        equation = (1 - t)**3 * P0 + 3 * (1 - t)**2 * t * P1 + 3 * (1 - t) * t**2 * P2 + t**3 * P3 - x
+        print("Original Equation:")
+        print(equation)
 
-    # Substitute known values into the equation
-    equationWithKnowns = equation.subs({P0: P0Value, P3: P3Value, x: xValue, t: tValue})
-    print("\nEquation with Known Values Substituted:")
-    print(equationWithKnowns)
+        print({P0: controlPoints[0], P3: controlPoints[3], x: xValue, t: tSolution})
+        # Substitute known values into the equation
+        equationWithKnowns = equation.subs({P0: controlPoints[0], P3: controlPoints[3], x: xValue, t: tSolution})
+        print("\nEquation with Known Values Substituted:")
+        print(equationWithKnowns)
 
-    # Simplify the equation
-    simplifiedEquation = simplify(equationWithKnowns)
-    print("\nSimplified Equation:")
-    print(simplifiedEquation)
+        # Simplify the equation
+        simplifiedEquation = simplify(equationWithKnowns)
+        print("\nSimplified Equation:")
+        print(simplifiedEquation)
+        print("-----------------")
 
     return simplifiedEquation
 
-# Known values for solving for control points
-p0Value = Rational(0, 1)
-p3Value = Rational(3, 1)
-xValue = Rational(1, 1)
-tValue = Rational(1, 3)
-# Equation: 4*P1/9 + 2*P2/9 - 8/9 = 0
-simplifyForControlPoints(p0Value, p3Value, xValue, tValue)
+# based on sample data from audio file:
+# xControlPoints:  [[0. 1. 2. 3.]]
+# yControlPoints:  [[ 0.         -0.00017293  0.000295   -0.0005188 ]]
+# indexesIterated: [[0. 1. 2. 3.]]
+# samplesIterated: [[ 0.00000000e+00 -3.05175781e-05 -6.10351562e-05 -5.18798828e-04]]
+# using intersection of curve at first point (1, -3.05175781e-05) as example
 
-print("-----------------")
+# # setup for determining x-aspect of curve
+# # Known values for every x-component of the curve
+# controlPoints = [0, 1, 2, 3]
+# xValue = 1
+# # solve for t value at point (1, -3.05175781e-05)
+# solveForT(controlPoints, xValue) # result: t = 1/3 (only)
+# tValue = Rational(1, 3)
+# # use t value to solve for control point relation
+# simplifyForControlPoints(controlPoints, xValue, tValue)# result: 4*P1/9 + 2*P2/9 - 8/9 = 0
 
-# Known values for solving for t
-p0Value = 0
-p1Value = -0.00017293
-p2Value = 0.000295
-p3Value = -0.0005188
-xValue = -3.05175781e-05
-# t = 1/3
-
-solveForT(p0Value, p1Value, p2Value, p3Value, xValue)
+# # setup for determining y-aspect of curve
+# # Known values for every y-component of the curve
+# controlPoints = [0, -0.00017293, 0.000295, -0.0005188]
+# xValue = -3.05175781e-05
+# # solve for t value at point (1, -3.05175781e-05)
+# solveForT(controlPoints, xValue) # result: t = 1/3 (and 0.08 and 0.59)
+# tValue = Rational(1, 3)
+# # use t value to solve for control point relation
+# simplifyForControlPoints(controlPoints, xValue, tValue)# result: 4*P1/9 + 2*P2/9 + 1.13e-5 = 0

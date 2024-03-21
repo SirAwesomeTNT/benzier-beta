@@ -1,6 +1,6 @@
-import bezierCurveMethods as bezierCurveMethods
+import retiredPrograms.bezierCurveMethods as bezierCurveMethods
 import numpy as np
-import graphicsMethods as graphicsMethods
+import retiredPrograms.graphicsMethods as graphicsMethods
 
 # Bezier curve functions
 generateControlPoints = bezierCurveMethods.calculateLeastSquaresBezierControlPoints
