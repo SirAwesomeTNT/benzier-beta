@@ -2,12 +2,14 @@ import numpy as np
 import ffmpegMethods as ffmpegMethods
 import BCMver2 as BCMver2
 import matplotlib.pyplot as plt
+import forcingTValues as forcingTValues
 
 # Loading functions from the imported modules
 # ffmpeg functions
 extractAndChunkSamples = ffmpegMethods.extractAndChunkSamples
 # faster BCMver2 functions for bezier calculation
 fastControlPoints = BCMver2.calculateControlPoints
+# forcing t-value functions
 
 class BezierPlot:
     def __init__(self, filePath):
@@ -139,29 +141,26 @@ class BezierPlot:
 
         return xCtrl, yCtrl
 
-    def process(self):
-        leftChunk, rightChunk = extractAndChunkSamples(self.filePath, 13)
-
-        # plot samples
-        xControlPoints, yControlPoints, indexesIterated, samplesIterated = self.batchFastControlPoints(leftChunk, 3)
-        print("xControlPoints:\n", xControlPoints)  # Print x control points for debugging
-        print("yControlPoints:\n", yControlPoints)  # Print y control points for debugging
-        print("indexesIterated:\n", indexesIterated)  # Print indexes for debugging
-        print("samplesIterated:\n", samplesIterated)  # Print samples for debugging
-
-        # plot all samples and curves
-        self.plotSamplesAndBezierCurves(leftChunk, xControlPoints, yControlPoints)
-
-        # modify array to line up control points with others
-        xControlPoints, yControlPoints = self.matchCurveWithSurroundings(xControlPoints, yControlPoints, 1, 1)
-        xControlPoints, yControlPoints = self.matchCurveWithSurroundings(xControlPoints, yControlPoints, 2, 1)
-
-        # plot samples and bezier curves
-        self.plotSamplesAndBezierCurves(leftChunk, xControlPoints, yControlPoints)
-
 # declare file path
-filePath = "bezier-alpha/songLocation.txt"
-
-# Instantiate BezierPlot class and process the data
+filePath = "bezier-alpha/songLocation.txt"  
 bezierPlot = BezierPlot(filePath)
-bezierPlot.process()
+
+# extract samples from song at file path
+leftChunk, rightChunk = extractAndChunkSamples(bezierPlot.filePath, 13)
+
+# plot samples
+xControlPoints, yControlPoints, indexesIterated, samplesIterated = bezierPlot.batchFastControlPoints(leftChunk, 3)
+print("xControlPoints:\n", xControlPoints)  # Print x control points for debugging
+print("yControlPoints:\n", yControlPoints)  # Print y control points for debugging
+print("indexesIterated:\n", indexesIterated)  # Print indexes for debugging
+print("samplesIterated:\n", samplesIterated)  # Print samples for debugging
+
+# plot all samples and curves
+bezierPlot.plotSamplesAndBezierCurves(leftChunk, xControlPoints, yControlPoints)
+
+# modify array to line up control points with others
+xControlPoints, yControlPoints = bezierPlot.matchCurveWithSurroundings(xControlPoints, yControlPoints, 1, 1)
+xControlPoints, yControlPoints = bezierPlot.matchCurveWithSurroundings(xControlPoints, yControlPoints, 2, 1)
+
+# plot samples and bezier curves
+bezierPlot.plotSamplesAndBezierCurves(leftChunk, xControlPoints, yControlPoints)

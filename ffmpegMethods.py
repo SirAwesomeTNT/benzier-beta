@@ -40,9 +40,6 @@ def extractAndChunkSamples(filePath, amount):
         print("Error:", e.stderr)
         return None, None
     
-import numpy as np
-import subprocess
-
 class AudioGenerator:
     def __init__(self):
         pass
@@ -77,11 +74,11 @@ class AudioGenerator:
             ffmpeg_process.communicate(input=audio_data)
 
 
-# Example usage:
-generator = AudioGenerator()
-# Generate random sample values
-random_samples = np.random.uniform(-1.0, 1.0, size=(2, 10000))
-# Output file path
-output_file = "random_samples_stereo.flac"
-# Generate audio file
-generator.generate_audio_from_samples(random_samples, output_file)
+# # Example usage:
+# generator = AudioGenerator()
+# # Generate random sample values
+# random_samples = np.random.uniform(-1.0, 1.0, size=(2, 10000))
+# # Output file path
+# output_file = "random_samples_stereo.flac"
+# # Generate audio file
+# generator.generate_audio_from_samples(random_samples, output_file)
