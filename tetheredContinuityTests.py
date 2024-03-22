@@ -233,29 +233,29 @@ def findRelations(start, end, xControlPoints, yControlPoints, indexesIterated, s
 filePath = "bezier-alpha/songLocation.txt"  
 bezierPlot = BezierPlot(filePath)
 
-# # grab actual data:
-# # extract samples from song at file path
-# leftChunk, rightChunk = extractAndChunkSamples(bezierPlot.filePath, 13)
+# grab actual data:
+# extract samples from song at file path
+# leftChunk, rightChunk = extractAndChunkSamples(bezierPlot.filePath, 7)
 # # assign samples to arrays
 # xControlPoints, yControlPoints, indexesIterated, samplesIterated = bezierPlot.batchFastControlPoints(leftChunk, 3)
     
 # create random data:
-xControlPoints, yControlPoints, indexesIterated, samplesIterated, leftChunk = bezierPlot.batchRandomControlPoints(16, 3)
+xControlPoints, yControlPoints, indexesIterated, samplesIterated, leftChunk = bezierPlot.batchRandomControlPoints(7, 3)
 
 print("xControlPoints:\n", xControlPoints)  # Print x control points for debugging
 print("yControlPoints:\n", yControlPoints)  # Print y control points for debugging
 print("indexesIterated:\n", indexesIterated)  # Print indexes for debugging
 print("samplesIterated:\n", samplesIterated)  # Print samples for debugging
 
-findRelations(0, 5, xControlPoints, yControlPoints, indexesIterated, samplesIterated)
+findRelations(0, 2, xControlPoints, yControlPoints, indexesIterated, samplesIterated)
 
 # plot all samples and curves
 bezierPlot.plotSamplesAndBezierCurves(leftChunk, xControlPoints, yControlPoints)
 
-# # modify array to line up control points with others
-# xControlPoints, yControlPoints = bezierPlot.matchCurveWithSurroundings(xControlPoints, yControlPoints, 1, 1)
-# xControlPoints, yControlPoints = bezierPlot.matchCurveWithSurroundings(xControlPoints, yControlPoints, 2, 1)
-# # now the curves are continuous, but no longer match the samples
+# modify array to line up control points with others
+xControlPoints, yControlPoints = bezierPlot.matchCurveWithSurroundings(xControlPoints, yControlPoints, 1, 1)
+xControlPoints, yControlPoints = bezierPlot.matchCurveWithSurroundings(xControlPoints, yControlPoints, 2, 1)
+# now the curves are continuous, but no longer match the samples
 
-# # plot samples and bezier curves
-# bezierPlot.plotSamplesAndBezierCurves(leftChunk, xControlPoints, yControlPoints)
+# plot samples and bezier curves
+bezierPlot.plotSamplesAndBezierCurves(leftChunk, xControlPoints, yControlPoints)

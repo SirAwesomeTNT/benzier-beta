@@ -23,7 +23,7 @@ def solveForT(controlPoints, xValue):
     # Solve the equation for t
     solutions = solve(equationWithKnowns, t)
     
-    return solutions
+    return (solutions)
 
 def simplifyForControlPoints(controlPoints, xValue, tValue):
     # Define symbols
