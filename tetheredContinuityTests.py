@@ -189,6 +189,46 @@ class BezierPlot:
 
         return xCtrl, yCtrl
 
+def findRelations(start, end, xControlPoints, yControlPoints, indexesIterated, samplesIterated):
+
+    xCoefficients = np.empty((2, 0))
+    yCoefficients = np.empty((2, 0))
+
+    for index in range(start, end):
+        # method calls
+        t1 = solveForT(xControlPoints[index], indexesIterated[index, 1])
+        relation1x = simplifyForControlPoints(xControlPoints[index], indexesIterated[index, 1], t1)
+        relation1y = simplifyForControlPoints(yControlPoints[index], samplesIterated[index, 1], t1)
+
+        t2 = solveForT(xControlPoints[index], indexesIterated[index, 2])
+        relation2x = simplifyForControlPoints(xControlPoints[index], indexesIterated[index, 2], t2)
+        relation2y = simplifyForControlPoints(yControlPoints[index], samplesIterated[index, 2], t2)
+        # print statements
+        print("CurveIndex: ", index)
+        print("t1:", t1)
+        print("relation1x:", relation1x)
+        print("relation1y:", relation1y)
+        print("t2:", t2)
+        print("relation2x:", relation2x)
+        print("relation2y:", relation2y)
+        print("-----------------")
+
+    #     currentXCurveArray = np.array([
+    #         [indexesIterated[index, 1], indexesIterated[index, 2]],
+    #         [relation1x[1], relation2x[1]]
+    #     ])
+    #     currentYCurveArray = np.array([
+    #         [samplesIterated[index, 1], samplesIterated[index, 2]],
+    #         [relation1y[1], relation2y[1]]
+    #     ])
+
+    #     xCoefficients = np.append(xCoefficients, currentXCurveArray, axis=1)
+    #     yCoefficients = np.append(yCoefficients, currentYCurveArray, axis=1)
+
+    # print(xCoefficients)
+    # print(yCoefficients)
+    return xCoefficients, yCoefficients
+
 # declare file path and instantiate bezierPlot object
 filePath = "bezier-alpha/songLocation.txt"  
 bezierPlot = BezierPlot(filePath)
@@ -200,41 +240,14 @@ bezierPlot = BezierPlot(filePath)
 # xControlPoints, yControlPoints, indexesIterated, samplesIterated = bezierPlot.batchFastControlPoints(leftChunk, 3)
     
 # create random data:
-xControlPoints, yControlPoints, indexesIterated, samplesIterated, leftChunk = bezierPlot.batchRandomControlPoints(13, 3)
+xControlPoints, yControlPoints, indexesIterated, samplesIterated, leftChunk = bezierPlot.batchRandomControlPoints(16, 3)
 
 print("xControlPoints:\n", xControlPoints)  # Print x control points for debugging
 print("yControlPoints:\n", yControlPoints)  # Print y control points for debugging
 print("indexesIterated:\n", indexesIterated)  # Print indexes for debugging
 print("samplesIterated:\n", samplesIterated)  # Print samples for debugging
 
-t1x = solveForT(xControlPoints[0], indexesIterated[0, 1]) # 1/3
-print("t1x:", t1x, "\n")
-relation1x = simplifyForControlPoints(xControlPoints[0], indexesIterated[0, 1], t1x)
-print("relation1x:", relation1x, "\n")
-t1y = solveForT(yControlPoints[0], samplesIterated[0, 1]) # 1/3 but imaginary?
-print("t1y:", t1y, "\n")
-relation1y = simplifyForControlPoints(yControlPoints[0], samplesIterated[0, 1], t1y)
-print("relation1y:", relation1y, "\n")
-
-
-t2x = solveForT(xControlPoints[0], indexesIterated[0, 2])
-print("t2x:", t2x, "\n")
-relation2x = simplifyForControlPoints(xControlPoints[0], indexesIterated[0, 2], t2x)
-print("relation2x:", relation2x, "\n")
-t2y = solveForT(yControlPoints[0], samplesIterated[0, 2])
-print("t2y:", t2y, "\n")
-relation2y = simplifyForControlPoints(yControlPoints[0], samplesIterated[0, 2], t2y)
-print("relation2y:", relation2y, "\n")
-
-print("t1x:", t1x)
-print("relation1x:", relation1x)
-print("t1y:", t1y)
-print("relation1y:", relation1y)
-
-print("t2x:", t2x)
-print("relation2x:", relation2x)
-print("t2y:", t2y)
-print("relation2y:", relation2y)
+findRelations(0, 5, xControlPoints, yControlPoints, indexesIterated, samplesIterated)
 
 # plot all samples and curves
 bezierPlot.plotSamplesAndBezierCurves(leftChunk, xControlPoints, yControlPoints)

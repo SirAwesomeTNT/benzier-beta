@@ -1,4 +1,14 @@
-from sympy import symbols, solve, simplify, Rational
+from sympy import symbols, solve, simplify, nsimplify
+import re
+
+def getEndCoefficient(addExpression):
+    # If the expression is an Add type, iterate through the terms
+    for term in addExpression.args:
+        if term.is_number:
+            return term.evalf()
+    
+    # If no constant term is found, return 0
+    return 0
 
 def solveForT(controlPoints, xValue):
     # Define symbols
@@ -6,19 +16,12 @@ def solveForT(controlPoints, xValue):
     
     # Define the equation
     equation = (1 - t)**3 * P0 + 3 * (1 - t)**2 * t * P1 + 3 * (1 - t) * t**2 * P2 + t**3 * P3 - x
-    print("Original Equation:")
-    print(equation)
 
     # Substitute known values into the equation
     equationWithKnowns = equation.subs({P0: controlPoints[0], P1: controlPoints[1], P2: controlPoints[2], P3: controlPoints[3], x: xValue})
-    print("\nEquation with Known Values Substituted:")
-    print(equationWithKnowns)
 
     # Solve the equation for t
     solutions = solve(equationWithKnowns, t)
-    print("\nSolutions:")
-    print(solutions)
-    print("-----------------")
     
     return solutions
 
@@ -26,26 +29,23 @@ def simplifyForControlPoints(controlPoints, xValue, tValue):
     # Define symbols
     t, x, P0, P1, P2, P3 = symbols('t x P0 P1 P2 P3')
 
-    for tSolution in tValue:
-        print(f"t = {tSolution}")
-        # Define the equation with known constants
-        equation = (1 - t)**3 * P0 + 3 * (1 - t)**2 * t * P1 + 3 * (1 - t) * t**2 * P2 + t**3 * P3 - x
-        print("Original Equation:")
-        print(equation)
+    if(len(tValue) > 1):
+        print("Error: More than one t-value!")
+        return
+    tSolution = tValue[0]
 
-        print({P0: controlPoints[0], P3: controlPoints[3], x: xValue, t: tSolution})
-        # Substitute known values into the equation
-        equationWithKnowns = equation.subs({P0: controlPoints[0], P3: controlPoints[3], x: xValue, t: tSolution})
-        print("\nEquation with Known Values Substituted:")
-        print(equationWithKnowns)
+    # Define the equation with known constants
+    equation = (1 - t)**3 * P0 + 3 * (1 - t)**2 * t * P1 + 3 * (1 - t) * t**2 * P2 + t**3 * P3 - x
 
-        # Simplify the equation
-        simplifiedEquation = simplify(equationWithKnowns)
-        print("\nSimplified Equation:")
-        print(simplifiedEquation)
-        print("-----------------")
+    # Substitute known values into the equation
+    equationWithKnowns = equation.subs({P0: controlPoints[0], P3: controlPoints[3], x: xValue, t: tSolution})
 
-    return simplifiedEquation
+    # Simplify and rationalize the equation
+    simplifiedEquation = simplify(equationWithKnowns)
+    rationalizedEquation = nsimplify(simplifiedEquation)
+    coefficient = getEndCoefficient(rationalizedEquation)
+
+    return rationalizedEquation, coefficient
 
 # based on sample data from audio file:
 # xControlPoints:  [[0. 1. 2. 3.]]
