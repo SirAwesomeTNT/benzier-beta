@@ -48,17 +48,16 @@ def findRelations(start, end, xControlPoints, yControlPoints, indexesIterated, s
     # print(yCoefficients)
     return xCoefficients, yCoefficients
 
-def plotSamplesAndBezierCurves(samples, xControlPoints, yControlPoints):
+def plotBezierCurvesAndSamples(ax, xControlPoints, yControlPoints, samples):
     """
     Plot Bezier curves along with control points and sample points.
     
     Args:
-    - samples: Array of sample data points
+    - ax: Axis object to plot on
     - xControlPoints: List of arrays containing x-coordinate control points for each Bezier curve
     - yControlPoints: List of arrays containing y-coordinate control points for each Bezier curve
+    - samples: Array of sample data points
     """
-    fig, ax = plt.subplots(figsize=(8, 6))
-
     # Define a list of colors for the Bezier curves
     curveColors = ['blue', 'green', 'red', 'orange', 'purple', 'cyan', 'magenta', 'yellow']
 
@@ -81,68 +80,119 @@ def plotSamplesAndBezierCurves(samples, xControlPoints, yControlPoints):
 
     # Plot sample points as black dots
     ax.scatter(np.arange(len(samples)), samples, color='black', label='Samples')
-    
-    # # Plot lines
-    # # P1 Line
-    # x_values = np.linspace(-10, 10, 100)  # Adjust the range of x-values as needed
-    # y_values = 0.24232 - 0.571737 * x_values
-    # ax.plot(x_values, y_values, label='0 = 0.24232 - 0.571737 * x', color='green')
 
-    # # P2 Line
-    # x_values = np.linspace(-10, 10, 100)  # Adjust the range of x-values as needed
-    # y_values = 0.590842 * x_values - 1.32344
-    # ax.plot(x_values, y_values, label='0 = 0.24232 - 0.571737 * x', color='green')
+    # Update the legend
+    ax.legend()
 
-    ax.set_title('Bezier Curves with Sample Points')
-    ax.set_xlabel('Index')
-    ax.set_ylabel('Values')
+    # Add gridlines
     ax.grid(True)
 
-    plt.tight_layout()
-    plt.show()
+def plotParametric(ax, equationX, equationY, startT, endT, xTranslation=0, yTranslation=0, equation_color='r', equation_label=None):
+    """
+    Plot lines for provided equations.
+    
+    Args:
+    - ax: Axis object to plot on
+    - equationX: equation for x-values of parametric
+    - equationY: equation for y-values of parametric
+    - startT: Start value of parameter t
+    - endT: End value of parameter t
+    - equation_color: Color of the line for the equation
+    - equation_label: Label for each equation
+    """
+    # Convert SymPy equations to lambda functions
+    t_symbol = sp.symbols('t')
+    equationX_lambda = sp.lambdify(t_symbol, equationX, 'numpy')
+    equationY_lambda = sp.lambdify(t_symbol, equationY, 'numpy')
 
-    return fig, ax
+    # Generate values for parameter t
+    t_values = np.linspace(startT, endT, 100)
 
+    # Calculate x and y coordinates using the parametric equations
+    # x_values = equationX_lambda(t_values) + xTranslation
+    # y_values = equationY_lambda(t_values) + yTranslation
+    x_values = equationX_lambda(t_values)
+    print("x_values", x_values[::3])
+    y_values = equationY_lambda(t_values)
+    print("y_values", y_values[::3])
+
+    # Plot the parametric curve
+    ax.plot(x_values, y_values, color=equation_color, label=equation_label)
+
+    # Add labels and title
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_title('Parametric Plot')
+
+    # Show plot
+    plt.grid(True)
+    # plt.axis('equal')  # Equal aspect ratio
+    plt.legend()
+
+
+# declare plot
+fig, ax = plt.subplots(figsize=(8, 6))
+
+# declare data
 xControlPoints = np.array([[0, 1, 2, 3], [3, 4, 5, 6]])
 yControlPoints = np.array([[5, Rational(5/6), Rational(-1/3), 6], [6, Rational(35/3), Rational(-31/6), 5]])
 indexesIterated = np.array([[0, 1, 2, 3], [3, 4, 5, 6]])
 samplesIterated = np.array([[5, 2, 2, 6], [6, 6, 2, 5]])
 
-findRelations(0, 2, xControlPoints, yControlPoints, indexesIterated, samplesIterated)
-
+# change the shape of samples so that it works with plotSamplesAndBezierCurves method
+indexesIterated = np.array([0, 1, 2, 3, 4, 5, 6])
 samplesIterated = np.array([5, 2, 2, 6, 6, 2, 5])
-
-# plot bezier so that it matches samples
-# plotSamplesAndBezierCurves(samplesIterated, xControlPoints, yControlPoints)
 
 # change the value of P1 on curve 2 to be C1 continuous with curve P1
 xControlPoints[1, 1] = 2 * xControlPoints[0, 3] - xControlPoints[0, 2]
 yControlPoints[1, 1] = 2 * yControlPoints[0, 3] - yControlPoints[0, 2]
-# plot again
-fig, ax = plotSamplesAndBezierCurves(samplesIterated, xControlPoints, yControlPoints)
 
-#
+# plot bezier curves
+plotBezierCurvesAndSamples(ax, xControlPoints, yControlPoints, samplesIterated)
 
-def simplify_equation():
-    # Define the symbols
-    P1, P2 = sp.symbols('P1 P2')
+# plot the line for all possible values of p1 that go through 'a' (sample @ index 4)
+# equation: 0 = (1 - t)**3 * P0 + 3 * (1 - t)**2 * t * P1 + 3 * (1 - t) * t**2 * P2 + t**3 * P3 - x
+# sub:      0 = (1 - t)**3 * xControlPoints[1, 0] + 3 * (1 - t)**2 * t * xControlPoints[1, 1] + 3 * (1 - t) * t**2 * xControlPoints[1, 2] + t**3 * xControlPoints[1, 3] - samplesIterated[4]
 
-    # Define the equation
-    equation = (1 - 0.35)**3 * 0 + 3 * (1 - 0.35)**2 * 0.35 * P1 + 3 * (1 - 0.35) * 0.35**2 * P2 + 0.35**3 * 3 - 1
+def simplify_equation(equation):
+    # Extract symbols from the equation
+    symbols = list(equation.free_symbols)
 
     # Simplify the equation
     simplified_equation = sp.simplify(equation)
     return simplified_equation
 
-# # Call the method and print the simplified equation
-# simplified_equation = simplify_equation()
-# print("Simplified equation:", simplified_equation)
+# Define the equation
+t, P2 = sp.symbols('t P2')
+# equation: P2 = (3 * (1 - t) * t**2 * x - (1 - t)**3 * P0 - 3 * (1 - t)**2 * t * P1 - t**3 * P3) / (3 * (1 - t) * t**2)
+# equation of P2x that goes through a
+equationAx = sp.Eq(P2, (3 * (1 - t) * t ** 2 * indexesIterated[4] - (1 - t) ** 3 * xControlPoints[1, 0] - 3 * (1 - t) ** 2 * t * xControlPoints[1, 1] - t ** 3 * xControlPoints[1, 3]) / (3 * (1 - t) * t ** 2))
+print(simplify_equation(equationAx))
+# equation of P2y that goes through a
+equationAy = sp.Eq(P2, (3 * (1 - t) * t ** 2 * samplesIterated[4] - (1 - t) ** 3 * yControlPoints[1, 0] - 3 * (1 - t) ** 2 * t * yControlPoints[1, 1] - t ** 3 * yControlPoints[1, 3]) / (3 * (1 - t) * t ** 2))
+print(simplify_equation(equationAy))
+# equation of P2x that goes through b
+equationBx = sp.Eq(P2, (3 * (1 - t) * t ** 2 * indexesIterated[5] - (1 - t) ** 3 * xControlPoints[1, 0] - 3 * (1 - t) ** 2 * t * xControlPoints[1, 1] - t ** 3 * xControlPoints[1, 3]) / (3 * (1 - t) * t ** 2))
+# equation of P2y that goes through b
+equationBy = sp.Eq(P2, (3 * (1 - t) * t ** 2 * samplesIterated[5] - (1 - t) ** 3 * yControlPoints[1, 0] - 3 * (1 - t) ** 2 * t * yControlPoints[1, 1] - t ** 3 * yControlPoints[1, 3]) / (3 * (1 - t) * t ** 2))
 
-def solve_equation():
-    P2 = sp.symbols('P2')
-    equation = sp.Eq(8.7267 - 0.53846 * P2, 13.296 - 1.8571 * P2)
-    P2_solution = sp.solve(equation, P2)
-    return P2_solution
+# working intersection
+# # plot parametric for a
+# plotParametric(ax, equationAx.rhs, equationAy.rhs, 0.51, 0.58, indexesIterated[4], samplesIterated[4])
+# # plot parametric for b
+# plotParametric(ax, equationBx.rhs, equationBy.rhs, 0.7, 0.78, indexesIterated[5], samplesIterated[5], equation_color='purple')
+# plt.show()
+
+# plot parametric for a
+plotParametric(ax, equationAx.rhs, equationAy.rhs, 0.45, 0.8, indexesIterated[4], samplesIterated[4])
+# plot parametric for b
+plotParametric(ax, equationBx.rhs, equationBy.rhs, 0.45, 0.8, indexesIterated[5], samplesIterated[5], equation_color='purple')
+plt.show()
+
+# Plot the equation
+# plot_sympy_equation(ax, equation, t, x_range=(0.01, 0.99), color='r', label='Equation')
+
+
 
 # # Call the function to solve for P1
 # P2_solution = solve_equation()
