@@ -118,6 +118,11 @@ def plotParametric(ax, equationX, equationY, startT, endT, xTranslation=0, yTran
 
     # Plot the parametric curve
     ax.plot(x_values, y_values, color=equation_color, label=equation_label)
+    
+    # Plot start and end points
+    # Starts at light grey, ends at dark grey
+    ax.scatter(x_values[0], y_values[0], color='darkgrey', label='start t')
+    ax.scatter(x_values[len(x_values)-1], y_values[len(y_values)-1], color='#333333', label='end t')
 
     # Add labels and title
     ax.set_xlabel('X')
@@ -152,7 +157,9 @@ plotBezierCurvesAndSamples(ax, xControlPoints, yControlPoints, samplesIterated)
 
 # plot the line for all possible values of p1 that go through 'a' (sample @ index 4)
 # equation: 0 = (1 - t)**3 * P0 + 3 * (1 - t)**2 * t * P1 + 3 * (1 - t) * t**2 * P2 + t**3 * P3 - x
-# sub:      0 = (1 - t)**3 * xControlPoints[1, 0] + 3 * (1 - t)**2 * t * xControlPoints[1, 1] + 3 * (1 - t) * t**2 * xControlPoints[1, 2] + t**3 * xControlPoints[1, 3] - samplesIterated[4]
+# equation: P2 = (- (1 - t)**3 * P0 - 3 * (1 - t)**2 * t * P1 - t**3 * P3 + x) / (3 * (1 - t) * t**2)
+# sub:      P2 = (- (1 - t)**3 * xControlPoints[1, 0] - 3 * (1 - t)**2 * t * xControlPoints[1, 1] - t**3 * xControlPoints[1, 3] + indexesIterated[4]) / (3 * (1 - t) * t**2)
+
 
 def simplify_equation(equation):
     # Extract symbols from the equation
@@ -164,17 +171,18 @@ def simplify_equation(equation):
 
 # Define the equation
 t, P2 = sp.symbols('t P2')
-# equation: P2 = (3 * (1 - t) * t**2 * x - (1 - t)**3 * P0 - 3 * (1 - t)**2 * t * P1 - t**3 * P3) / (3 * (1 - t) * t**2)
 # equation of P2x that goes through a
-equationAx = sp.Eq(P2, (3 * (1 - t) * t ** 2 * indexesIterated[4] - (1 - t) ** 3 * xControlPoints[1, 0] - 3 * (1 - t) ** 2 * t * xControlPoints[1, 1] - t ** 3 * xControlPoints[1, 3]) / (3 * (1 - t) * t ** 2))
+equationAx = sp.Eq(P2, (- (1 - t)**3 * xControlPoints[1, 0] - 3 * (1 - t)**2 * t * xControlPoints[1, 1] - t**3 * xControlPoints[1, 3] + indexesIterated[4]) / (3 * (1 - t) * t**2))
 print(simplify_equation(equationAx))
 # equation of P2y that goes through a
-equationAy = sp.Eq(P2, (3 * (1 - t) * t ** 2 * samplesIterated[4] - (1 - t) ** 3 * yControlPoints[1, 0] - 3 * (1 - t) ** 2 * t * yControlPoints[1, 1] - t ** 3 * yControlPoints[1, 3]) / (3 * (1 - t) * t ** 2))
+equationAy = sp.Eq(P2, (- (1 - t)**3 * yControlPoints[1, 0] - 3 * (1 - t)**2 * t * yControlPoints[1, 1] - t**3 * yControlPoints[1, 3] + samplesIterated[4]) / (3 * (1 - t) * t**2))
 print(simplify_equation(equationAy))
 # equation of P2x that goes through b
-equationBx = sp.Eq(P2, (3 * (1 - t) * t ** 2 * indexesIterated[5] - (1 - t) ** 3 * xControlPoints[1, 0] - 3 * (1 - t) ** 2 * t * xControlPoints[1, 1] - t ** 3 * xControlPoints[1, 3]) / (3 * (1 - t) * t ** 2))
+equationBx = sp.Eq(P2, (- (1 - t)**3 * xControlPoints[1, 0] - 3 * (1 - t)**2 * t * xControlPoints[1, 1] - t**3 * xControlPoints[1, 3] + indexesIterated[5]) / (3 * (1 - t) * t**2))
+print(simplify_equation(equationAx))
 # equation of P2y that goes through b
-equationBy = sp.Eq(P2, (3 * (1 - t) * t ** 2 * samplesIterated[5] - (1 - t) ** 3 * yControlPoints[1, 0] - 3 * (1 - t) ** 2 * t * yControlPoints[1, 1] - t ** 3 * yControlPoints[1, 3]) / (3 * (1 - t) * t ** 2))
+equationBy = sp.Eq(P2, (- (1 - t)**3 * yControlPoints[1, 0] - 3 * (1 - t)**2 * t * yControlPoints[1, 1] - t**3 * yControlPoints[1, 3] + samplesIterated[5]) / (3 * (1 - t) * t**2))
+print(simplify_equation(equationAy))
 
 # working intersection
 # # plot parametric for a
@@ -184,9 +192,9 @@ equationBy = sp.Eq(P2, (3 * (1 - t) * t ** 2 * samplesIterated[5] - (1 - t) ** 3
 # plt.show()
 
 # plot parametric for a
-plotParametric(ax, equationAx.rhs, equationAy.rhs, 0.45, 0.8, indexesIterated[4], samplesIterated[4])
+plotParametric(ax, equationAx.rhs, equationAy.rhs, 0.3, 0.8, indexesIterated[4], samplesIterated[4])
 # plot parametric for b
-plotParametric(ax, equationBx.rhs, equationBy.rhs, 0.45, 0.8, indexesIterated[5], samplesIterated[5], equation_color='purple')
+plotParametric(ax, equationBx.rhs, equationBy.rhs, 0.45, 0.85, indexesIterated[5], samplesIterated[5], equation_color='purple')
 plt.show()
 
 # Plot the equation
