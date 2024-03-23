@@ -1,7 +1,7 @@
 import numpy as np
+import sympy as sp
 import forcingTValues as fTV
 import matplotlib.pyplot as plt
-import sympy as sp
 from sympy import Rational
 
 # declare methods
@@ -112,9 +112,7 @@ def plotParametric(ax, equationX, equationY, startT, endT, xTranslation=0, yTran
     # x_values = equationX_lambda(t_values) + xTranslation
     # y_values = equationY_lambda(t_values) + yTranslation
     x_values = equationX_lambda(t_values)
-    print("x_values", x_values[::3])
     y_values = equationY_lambda(t_values)
-    print("y_values", y_values[::3])
 
     # Plot the parametric curve
     ax.plot(x_values, y_values, color=equation_color, label=equation_label)
@@ -122,7 +120,7 @@ def plotParametric(ax, equationX, equationY, startT, endT, xTranslation=0, yTran
     # Plot start and end points
     # Starts at light grey, ends at dark grey
     ax.scatter(x_values[0], y_values[0], color='darkgrey', label='start t')
-    ax.scatter(x_values[len(x_values)-1], y_values[len(y_values)-1], color='#333333', label='end t')
+    ax.scatter(x_values[len(x_values)-1], y_values[len(y_values)-1], color='#666666', label='end t')
 
     # Add labels and title
     ax.set_xlabel('X')
@@ -134,13 +132,13 @@ def plotParametric(ax, equationX, equationY, startT, endT, xTranslation=0, yTran
     # plt.axis('equal')  # Equal aspect ratio
     plt.legend()
 
-
 # declare plot
 fig, ax = plt.subplots(figsize=(8, 6))
 
 # declare data
-xControlPoints = np.array([[0, 1, 2, 3], [3, 4, 5, 6]])
+xControlPoints = np.array([[0, 1, 2, 3], [3, 4, 5, 6]]).astype(np.float32)
 yControlPoints = np.array([[5, Rational(5/6), Rational(-1/3), 6], [6, Rational(35/3), Rational(-31/6), 5]])
+print(type(yControlPoints))
 indexesIterated = np.array([[0, 1, 2, 3], [3, 4, 5, 6]])
 samplesIterated = np.array([[5, 2, 2, 6], [6, 6, 2, 5]])
 
@@ -153,13 +151,12 @@ xControlPoints[1, 1] = 2 * xControlPoints[0, 3] - xControlPoints[0, 2]
 yControlPoints[1, 1] = 2 * yControlPoints[0, 3] - yControlPoints[0, 2]
 
 # plot bezier curves
-plotBezierCurvesAndSamples(ax, xControlPoints, yControlPoints, samplesIterated)
+# plotBezierCurvesAndSamples(ax, xControlPoints, yControlPoints, samplesIterated)
 
 # plot the line for all possible values of p1 that go through 'a' (sample @ index 4)
 # equation: 0 = (1 - t)**3 * P0 + 3 * (1 - t)**2 * t * P1 + 3 * (1 - t) * t**2 * P2 + t**3 * P3 - x
 # equation: P2 = (- (1 - t)**3 * P0 - 3 * (1 - t)**2 * t * P1 - t**3 * P3 + x) / (3 * (1 - t) * t**2)
 # sub:      P2 = (- (1 - t)**3 * xControlPoints[1, 0] - 3 * (1 - t)**2 * t * xControlPoints[1, 1] - t**3 * xControlPoints[1, 3] + indexesIterated[4]) / (3 * (1 - t) * t**2)
-
 
 def simplify_equation(equation):
     # Extract symbols from the equation
@@ -169,42 +166,130 @@ def simplify_equation(equation):
     simplified_equation = sp.simplify(equation)
     return simplified_equation
 
+def solve_equation(equation, variables):
+    """
+    Solve an equation for a given variable.
+
+    Args:
+    - equation (sympy.Expr): The equation to solve.
+    - variable (sympy.Symbol): The variable to solve for.
+
+    Returns:
+    - solutions (list): List of solutions for the variable.
+    """
+    solutions = sp.solve(equation, variables, domain=sp.Interval(0, 1) * sp.Interval(0, 1))
+    print("Solutions for:", equation)
+    for sol in solutions:
+        print(sol)
+
+    return solutions
+
 # Define the equation
 t, P2 = sp.symbols('t P2')
 # equation of P2x that goes through a
 equationAx = sp.Eq(P2, (- (1 - t)**3 * xControlPoints[1, 0] - 3 * (1 - t)**2 * t * xControlPoints[1, 1] - t**3 * xControlPoints[1, 3] + indexesIterated[4]) / (3 * (1 - t) * t**2))
-print(simplify_equation(equationAx))
+print("equationAx:", simplify_equation(equationAx))
 # equation of P2y that goes through a
 equationAy = sp.Eq(P2, (- (1 - t)**3 * yControlPoints[1, 0] - 3 * (1 - t)**2 * t * yControlPoints[1, 1] - t**3 * yControlPoints[1, 3] + samplesIterated[4]) / (3 * (1 - t) * t**2))
-print(simplify_equation(equationAy))
+print("equationAy:", simplify_equation(equationAy))
 # equation of P2x that goes through b
 equationBx = sp.Eq(P2, (- (1 - t)**3 * xControlPoints[1, 0] - 3 * (1 - t)**2 * t * xControlPoints[1, 1] - t**3 * xControlPoints[1, 3] + indexesIterated[5]) / (3 * (1 - t) * t**2))
-print(simplify_equation(equationAx))
+print("equationBx:", simplify_equation(equationBx))
 # equation of P2y that goes through b
 equationBy = sp.Eq(P2, (- (1 - t)**3 * yControlPoints[1, 0] - 3 * (1 - t)**2 * t * yControlPoints[1, 1] - t**3 * yControlPoints[1, 3] + samplesIterated[5]) / (3 * (1 - t) * t**2))
-print(simplify_equation(equationAy))
+print("equationBy:", simplify_equation(equationBy))
 
-# working intersection
-# # plot parametric for a
-# plotParametric(ax, equationAx.rhs, equationAy.rhs, 0.51, 0.58, indexesIterated[4], samplesIterated[4])
-# # plot parametric for b
-# plotParametric(ax, equationBx.rhs, equationBy.rhs, 0.7, 0.78, indexesIterated[5], samplesIterated[5], equation_color='purple')
-# plt.show()
+# set equations equal to each other and simplify
+# All P2 that goes through a = All P2 that goes through b
+# variables: t is now ta, tb for each respective point
+ta, tb = sp.symbols('ta tb')
+# intersection should be solution that goes through both
+# equationP2x = sp.Eq((- (1 - ta)**3 * xControlPoints[1, 0] - 3 * (1 - ta)**2 * ta * xControlPoints[1, 1] - ta**3 * xControlPoints[1, 3] + indexesIterated[4]) / (3 * (1 - ta) * ta**2), (- (1 - tb)**3 * xControlPoints[1, 0] - 3 * (1 - tb)**2 * tb * xControlPoints[1, 1] - tb**3 * xControlPoints[1, 3] + indexesIterated[5]) / (3 * (1 - tb) * tb**2))
+# simpleEqutionP2x = simplify_equation(equationP2x)
+# print("equationP2x:", simpleEqutionP2x)
 
+t_symbol = sp.symbols('t')
+
+# instead, do a quick grid search for initial intersections
+# for x
+# define t-values
+taValues = np.linspace(0.01, 0.99, 500)
+tbValues = np.linspace(0.01, 0.99, 500)
+
+# Define lambda functions
+lambdaAx = sp.lambdify(t_symbol, equationAx.rhs, modules=['numpy'])
+lambdaBx = sp.lambdify(t_symbol, equationBx.rhs, modules=['numpy'])
+lambdaAy = sp.lambdify(t_symbol, equationAy.rhs, modules=['numpy'])
+lambdaBy = sp.lambdify(t_symbol, equationBy.rhs, modules=['numpy'])
+
+p1x = xControlPoints[1,1]
+p1y = yControlPoints[1,1].evalf()
+print(p1x, p1y)
+
+# define solution arrays
+taSolutions = np.array([])
+tbSolutions = np.array([])
+distanceFromP1 = np.array([])
+
+# find solutions
+for taVal in taValues:
+    aX = lambdaAx(taVal)
+    aY = lambdaAy(taVal)
+    for tbVal in tbValues:
+        bX = lambdaBx(tbVal)
+        bY = lambdaBy(tbVal)
+        if (bX - aX)**2 + (bY - aY)**2 < 5e-4:
+            print(f"P2a: ({aX}, {aY})")
+            print(f"P2b: ({bX}, {bY})")
+            distanceSquared = (p1x - aX)**2 + (p1y - aY)**2
+            taSolutions = np.append(taSolutions, taVal)
+            tbSolutions = np.append(tbSolutions, tbVal)
+            distanceFromP1 = np.append(distanceFromP1, distanceSquared)
+
+# for all these t-values, the resulting aX = bX and aY = bY
+print("taSolutions:", taSolutions)
+print("tbSolutions:", tbSolutions)
+print("distanceFromP1:", distanceFromP1)
+
+# select closest solution
+minIndex = np.argmin(distanceFromP1)
+taFinal = taSolutions[minIndex]
+tbFinal = tbSolutions[minIndex]
+print("taFinal:", taFinal)
+print("tbFinal:", tbFinal)
+
+# solve again for x-values
+print(xControlPoints)
+xControlPoints[1, 2] = lambdaAx(taSolutions[minIndex])
+yControlPoints[1, 2] = lambdaAy(taSolutions[minIndex])
+print(xControlPoints)
+plotBezierCurvesAndSamples(ax, xControlPoints, yControlPoints, samplesIterated)
+
+# the solution we want is at: (4.6, -4.5)
+
+
+# for later:
+# conduct another test to find a better/closer solution
+# plug exact ta/tb into equation once more to find final P2
+# implement implement implement!
+
+
+
+# PROOF INTERSECTION!!!
 # plot parametric for a
 plotParametric(ax, equationAx.rhs, equationAy.rhs, 0.3, 0.8, indexesIterated[4], samplesIterated[4])
 # plot parametric for b
 plotParametric(ax, equationBx.rhs, equationBy.rhs, 0.45, 0.85, indexesIterated[5], samplesIterated[5], equation_color='purple')
 plt.show()
 
-# Plot the equation
-# plot_sympy_equation(ax, equation, t, x_range=(0.01, 0.99), color='r', label='Equation')
+# whole parametric curves
+# # plot parametric for a
+# plotParametric(ax, equationAx.rhs, equationAy.rhs, 0.1, 0.90, indexesIterated[4], samplesIterated[4])
+# # plot parametric for b
+# plotParametric(ax, equationBx.rhs, equationBy.rhs, 0.2, 0.90, indexesIterated[5], samplesIterated[5], equation_color='purple')
+# plt.show()
 
-
-
-# # Call the function to solve for P1
-# P2_solution = solve_equation()
-# print("Solution for P2:", P2_solution)
+####### notes belowwwwww
 
 # for x
 # equation: 0 = (1 - t)**3 * P0 + 3 * (1 - t)**2 * t * P1 + 3 * (1 - t) * t**2 * P2 + t**3 * P3 - x
